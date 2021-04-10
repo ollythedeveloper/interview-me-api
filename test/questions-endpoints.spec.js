@@ -66,4 +66,59 @@ describe(`Questions Endpoints`, function() {
             })
         })
     })
+
+    describe(`GET /api/questions/:question_id`, () => {
+        context(`Given no questions`, () => {
+            it(`responds with 404`, () => {
+                const questionId = 123456
+                return supertest(app)
+                    .get(`/api/questions/${questionId}`)
+                    .expect(404, { error: { message: `Question Not Found` } })
+            })
+        })
+
+        context('Given there are questions in the database', () => {
+            const testQuestions = makeQuestionsArray()
+
+            beforeEach('insert questions', () => {
+                return db
+                    .into('questions')
+                    .insert(testQuestions)
+            })
+
+            it('responds with 200 and the specified question', () => {
+                const questionId = 2
+                const expectedQuestion = testQuestions[questionId - 1]
+                return supertest(app)
+                    .get(`/api/questions/${questionId}`)
+                    .expect(200, expectedQuestion)
+            })
+        })
+    })
+
+    describe.only(`POST /api/questions`, () => {
+        it(`creates a question, responding with 201 and the new question`, function() {
+            const newQuestion = {
+                question: 'Test new question',
+                guidance: 'Test new guidance',
+                response: 'Test new response',
+            }
+            return supertest(app)
+                .post(`/api/questions`)
+                .send(newQuestion)
+                .expect(201)
+                .expect(res => {
+                    expect(res.body.question).to.eql(newQuestion.question)
+                    expect(res.body.guidance).to.eql(newQuestion.guidance)
+                    expect(res.body.response).to.eql(newQuestion.response)
+                    expect(res.headers.location).to.eql(`/api/questions/${res.body.id}`)
+                    expect(res.body).to.have.property('id')
+                })
+                .then(res => 
+                    supertest(app)
+                    .get(`/api/questions/${res.body.id}`)
+                    .expect(res.body)
+                )
+        })
+    })
 })
