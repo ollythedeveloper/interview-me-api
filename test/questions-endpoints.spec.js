@@ -96,7 +96,7 @@ describe(`Questions Endpoints`, function() {
         })
     })
 
-    describe.only(`POST /api/questions`, () => {
+    describe(`POST /api/questions`, () => {
         it(`creates a question, responding with 201 and the new question`, function() {
             const newQuestion = {
                 question: 'Test new question',
@@ -120,5 +120,103 @@ describe(`Questions Endpoints`, function() {
                     .expect(res.body)
                 )
         })
+        const requiredFields = ['question', 'guidance']
+
+        requiredFields.forEach(field => {
+            const newQuestion = {
+                question: 'Test new question',
+                guidance: 'Test new guidance'
+            }
+
+            it(`responds with 400 and an error message when the '${field}' is missing`, () => {
+                delete newQuestion[field]
+
+                return supertest(app)
+                    .post('/api/questions')
+                    .send(newQuestion)
+                    .expect(400, {
+                        error: { message: `'${field}' is required` }
+                    })
+            })
+        })
+
+        it(`removes XSS attack content from the response`, () => {
+            const { maliciousQuestion, expectedQuestion } = makeMaliciousQuestion()
+            return supertest(app)
+                .post('/api/questions')
+                .send(maliciousQuestion)
+                .expect(201)
+                .expect(res => {
+                    expect(res.body.question).to.eql(expectedQuestion.question)
+                    expect(res.body.guidance).to.eql(expectedQuestion.guidance)
+                })
+        })
+
+    })
+
+    describe(`DELETE /api/questions/:question_id`, () => {
+        context(`Given no questions`, () => {
+            it(`responds with 404`, () => {
+                const questionId = 123456
+                return supertest(app)
+                    .delete(`/api/questions/${questionId}`)
+                    .expect(404, { error: { message: `Question Not Found`}})
+            })
+        })
+        context('Given there are questions in the database', () => {
+            const testQuestions = makeQuestionsArray()
+
+            beforeEach('insert questions', () => {
+                return db
+                    .into('questions')
+                    .insert(testQuestions)
+            })
+
+            it('responds with 204 and removes the question', () => {
+                const idToRemove = 2
+                const expectedQuestions = testQuestions.filter(question => question.id !== idToRemove)
+                return supertest(app)
+                    .delete(`/api/questions/${idToRemove}`)
+                    .expect(204)
+                    .then(res => 
+                        supertest(app)
+                        .get(`/api/questions`)
+                        .expect(expectedQuestions)
+                        )
+            })
+        })
+    })
+    describe.only(`PATCH /api/questions/:question_id`, () => {
+        context(`Given no questions`, () => {
+            it(`responds with 404`, () => {
+                const questionId = 123456
+                return supertest(app)
+                    .patch(`/api/questions/${questionId}`)
+                    .expect(404, { error: { message: `Question Not Found` } })
+            })
+        })
+        context('Given there are questions in the database', () => {
+            const testQuestions = makeQuestionsArray()
+
+            beforeEach('insert questions', () => {
+                return db
+                    .into('questions')
+                    .insert(testQuestions)
+            })
+
+            it('responds with 204 and updates the question', () => {
+                const idToUpdate = 2
+                const updateQuestion = {
+                    question: 'updated question',
+                    guidance: 'updted guidance'
+                }
+                const expectedQuestion = {
+                    ...testQuestions[idToUpdate - 1],
+                    ...updateQuestion
+                }
+                return supertest(app)
+                    .patch(`/api/questions`)
+            })
+        } )
     })
 })

@@ -79,5 +79,40 @@ questionsRouter
             response: xss(res.question.response), //sanitize response
         })
     })
+    .delete((req, res, next) => {
+        const { question_id } = req.params
+        QuestionsService.deleteQuestion(
+            req.app.get('db'),
+            req.params.question_id
+        )
+            .then(() => {
+                logger.info(`Question with id ${question_id} deleted.`)
+                res.status(204).end()
+            })
+            .catch(next)
+    })
+    .patch(bodyParser, (req, res, next) => {
+        const { question, guidance } = req.body
+        const questionToUpdate = { question, guidance }
+
+        const numberOfValues = Object.values(questionToUpdate).filter(Boolean).length
+        if(numberOfValues === 0) {
+            return res.status(400).json({
+                error: {
+                    message: `Request body must contain either 'question' or 'guidance'`
+                }
+            })
+        }
+
+        QuestionsService.updateQuestion(
+            req.app.get('db'),
+            req.params.question_id,
+            questionToUpdate
+        )
+            .then(numRowsAffected => {
+                res.status(204).end()
+            })
+            .catch(next)
+    })
 
 module.exports = questionsRouter
