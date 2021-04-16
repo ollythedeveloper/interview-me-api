@@ -96,7 +96,7 @@ describe(`Questions Endpoints`, function() {
         })
     })
 
-    describe(`POST /api/questions`, () => {
+    describe.only(`POST /api/questions`, () => {
         it(`creates a question, responding with 201 and the new question`, function() {
             const newQuestion = {
                 question: 'Test new question',
@@ -186,7 +186,7 @@ describe(`Questions Endpoints`, function() {
             })
         })
     })
-    describe.only(`PATCH /api/questions/:question_id`, () => {
+    describe(`PATCH /api/questions/:question_id`, () => {
         context(`Given no questions`, () => {
             it(`responds with 404`, () => {
                 const questionId = 123456
@@ -217,6 +217,42 @@ describe(`Questions Endpoints`, function() {
                 return supertest(app)
                     .patch(`/api/questions`)
             })
-        } )
+
+            it('responds with 400 when no required fields supplied', () => {
+                const idToUpdate = 2
+                return supertest(app)
+                    .patch(`/api/questions/${idToUpdate}`)
+                    .send({ irrelavantField: 'boo' })
+                    .expect(400, {
+                        error: {
+                            message: `Request body must contain either 'question' or 'guidance'`
+                        }
+                    })
+            })
+
+            it(`responds with 204 when updating only a subset of the fields`, () => {
+                const idToUpdate = 2
+                const updateQuestion = {
+                    question: 'update the question',
+                }
+                const expectedQuestion = {
+                    ...testQuestions[idToUpdate - 1],
+                    ...updateQuestion
+                }
+
+                return supertest(app)
+                    .patch(`/api/questions/${idToUpdate}`)
+                    .send({
+                        ...updateQuestion,
+                        fieldToIgnore: 'should not be in GET response'
+                    })
+                    .expect(204)
+                    .then(res => 
+                        supertest(app)
+                            .get(`/api/questions/${idToUpdate}`)
+                            .expect(expectedQuestion)
+                        )
+            })
+        })
     })
 })
