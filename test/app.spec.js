@@ -1,17 +1,9 @@
 const app = require('../src/app')
 
 describe('App', () => {
-    it('GET / responds with 200 containing "Hello, world!"', () => {
+    it('GET / responds with 200 containing "Try the api/questions path!"', () => {
         return supertest(app)
         .get('/')
-        .expect(200, 'Hello, world!')
-    })
-})
-
-describe('App api endpoint', () => {
-    it('GET / responds with 200 and json message', () => {
-        return supertest(app)
-        .get('/api/*')
-        .expect(200, { "ok": true })
+        .expect(200, 'Try the api/questions path!')
     })
 })
