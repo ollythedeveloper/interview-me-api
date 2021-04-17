@@ -1,5 +1,3 @@
-const { Knex } = require('knex')
-
 const QuestionsService = {
     getAllQuestions(knex) {
         return knex.select('*').from('questions')

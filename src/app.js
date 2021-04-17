@@ -4,23 +4,19 @@ const morgan = require('morgan')
 const cors = require('cors')
 const helmet = require('helmet')
 const { NODE_ENV, CLIENT_ORIGIN } = require('./config')
-const logger = require('./logger')
 const questionsRouter = require('./questions/questions-router')
 
 const app = express()
 
-const morganOption = (NODE_ENV === 'production')
-    ? 'tiny'
-    : 'common';
-
-app.use(morgan(morganOption))
-app.use(helmet())
-
+app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
+    skip: () => NODE_ENV === 'test'
+}))
 app.use(
     cors({
         origin: CLIENT_ORIGIN
     })
 );
+app.use(helmet())
 
 // app.use(function validateBearerToken(req, res, next) {
 //     const apiToken = process.env.API_TOKEN
