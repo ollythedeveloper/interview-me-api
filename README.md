@@ -1,27 +1,40 @@
-# Express Boilerplate!
+# Interview Me API
 
-This is a boilerplate project used for starting new projects!
+This App helps to prepare Job Seekers(Users) for interviews by prompting them with interview questions. The User will be able to video-record then review their responses.
+
+Live App: [Interview Me](https://interview-me.vercel.app/)
+
+Client Repo: [Interview Me Repo](https://github.com/ollythedeveloper/interview-me)
+
+## Screenshots
+Landing Page:
+![landingPage1](images/iM-landing-page1.png)
+![landingPage2](images/iM-landing-page2.png)
+
+Interview Prompt:
+![questionPage](images/iM-interview-prompt.png)
+
+Results:
+![resultsPage](images/iM-results.png)
+
+Results - Selected Question/Response:
+![resultsResponse](images/iM-results-respnse.png)
 
 ## Set up
 
-Complete the following steps to start a new project (NEW-PROJECT-NAME):
+Complete the following steps to set up locally:
 
-1. Clone this repository to your local machine `git clone BOILERPLATE-URL NEW-PROJECTS-NAME`
-2. `cd` into the cloned repository
-3. Make a fresh start of the git history for this project with `rm -rf .git && git init`
-4. Install the node dependencies `npm install`
-5. Move the example Environment file to `.env` that will be ignored by git and read by the express server `mv example.env .env`
-6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
-7. Note: To seed DB run cmd psql -U dunder_mifflin -d interview-me -f [path to seed file]
+1. Clone this repository to your local machine 
+2. `cd` into the cloned repository and run npm install
+3. Create the dev and test databases (`interview-me` and `interview-me-test`)
+4. Update the `.env` with your local variables
+5. Run the migrations for dev `npm run migrate`
+6. Run the migrations for test `npm run migrate:test`
+7. Seed the dev database `psql -U <db-user> -d interview-me -f ./seeds/seed.interview-me_questions.sql`
+8. Run the test to make sure everything is working properly `npm t`
+9. Start the app `npm run dev`
 
-## Scripts
-
-Start the application `npm start`
-
-Start nodemon for the application `npm run dev`
-
-Run the tests `npm test`
-
-## Deploying
-
-When your new project is ready for deployment, add a new Heroku application with `heroku create`. This will make a new git remote called "heroku" and you can then `npm run deploy` which will push to this remote's main branch.
+## Technology Used
+* Node
+* Express
+* Postgres
