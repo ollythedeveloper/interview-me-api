@@ -14,6 +14,9 @@ app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
 app.use(cors())
 app.use(helmet())
 
+
+// Not currently using Validation. Can  activate if needed.
+
 // app.use(function validateBearerToken(req, res, next) {
 //     const apiToken = process.env.API_TOKEN
 //     const authToken = req.get('Authorization')
